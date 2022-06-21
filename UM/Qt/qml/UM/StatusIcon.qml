@@ -17,19 +17,23 @@ Item
     property string status: StatusIcon.Status.NEUTRAL
 
     height: width
-    UM.ColorImage
+    UM.RecolorImage
     {
         id: iconBackground
         height: source != "" ? parent.height : 0
         width: height
+        sourceSize.width: width
+        sourceSize.height: height
         source: ""
         color: "transparent"
     }
-    UM.ColorImage
+    UM.RecolorImage
     {
         id: iconInner
         height: source != "" ? parent.height : 0
         width: height
+        sourceSize.width: width
+        sourceSize.height: height
         source: ""
         color: "transparent"
     }
@@ -43,7 +47,7 @@ Item
             PropertyChanges
             {
                 target: iconInner
-                source: UM.Theme.getIcon("CheckThin", "low")
+                source: UM.Theme.getIcon("Check", "low")
                 color: UM.Theme.getColor("message_success_icon")
             }
             PropertyChanges

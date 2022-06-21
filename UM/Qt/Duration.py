@@ -1,10 +1,8 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2017 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
-
-import enum
 from typing import Optional
 
-from PyQt6.QtCore import QObject, pyqtProperty, pyqtEnum, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtProperty, Q_ENUMS, pyqtSignal
 from UM.FlameProfiler import pyqtSlot
 
 from datetime import timedelta
@@ -16,12 +14,12 @@ i18n_catalog = i18nCatalog("uranium")
 
 
 class DurationFormat(QObject):
-    class Format(enum.IntEnum):
+    class Format:
         Seconds = 0
         Short = 1
         Long = 2
         ISO8601 = 3
-    pyqtEnum(Format)
+    Q_ENUMS(Format)
 
 
 class Duration(QObject):

@@ -34,7 +34,7 @@ class DefinitionPropertyType(enum.IntEnum):
     Function = 4  ## Value is a python function. It is passed to SettingFunction's constructor which will parse and analyze it.
 
 
-def toFloatConversion(value: str) -> float:
+def _toFloatConversion(value: str) -> float:
     """Conversion of string to float."""
 
     value = value.replace(",", ".")
@@ -54,8 +54,7 @@ def toFloatConversion(value: str) -> float:
     except:
         return 0
 
-
-def toIntConversion(value):
+def _toIntConversion(value):
     """Conversion from string to integer.
 
     :param value: The string representation of an integer.
@@ -65,7 +64,6 @@ def toIntConversion(value):
         return ast.literal_eval(value)
     except SyntaxError:
         return 0
-
 
 class SettingDefinition:
     """Defines a single Setting with its properties.
@@ -744,7 +742,7 @@ class SettingDefinition:
 
     __type_definitions = {
         # An integer value
-        "int": {"from": lambda v: str(v) if v is not None else "", "to": toIntConversion, "validator": Validator},
+        "int": {"from": lambda v: str(v) if v is not None else "", "to": _toIntConversion, "validator": Validator},
         # A boolean value
         "bool": {"from": str, "to": ast.literal_eval, "validator": Validator},
         # Special case setting; Doesn't have a value. Display purposes only.
@@ -754,7 +752,7 @@ class SettingDefinition:
         # An enumeration
         "enum": {"from": None, "to": None, "validator": None},
         # A floating point value
-        "float": {"from": lambda v: str(round(float(v), 4)) if v is not None else "", "to": toFloatConversion, "validator": Validator},
+        "float": {"from": lambda v: str(round(float(v), 4)) if v is not None else "", "to": _toFloatConversion, "validator": Validator},
         # A list of 2D points
         "polygon": {"from": str, "to": ast.literal_eval, "validator": None},
         # A list of polygons

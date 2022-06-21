@@ -1,10 +1,9 @@
-// Copyright (c) 2022 Ultimaker B.V.
+// Copyright (c) 2017 Ultimaker B.V.
 // Uranium is released under the terms of the LGPLv3 or higher.
 
 import QtQuick 2.10
 import QtQuick.Window 2.2
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs
 
 import UM 1.0 as UM
 
@@ -13,9 +12,8 @@ Window
 {
     id: base
 
-    modality: Qt.ApplicationModal
-    flags: (Qt.platform.os == "windows" ? Qt.Dialog : Qt.Window)  // <-- Ugly workaround for a bug in Windows, where the close-button doesn't show up unless we have a Dialog (but _not_ a Window).
-        | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint
+    modality: Qt.ApplicationModal;
+    flags: Qt.Dialog | Qt.CustomizeWindowHint | Qt.WindowTitleHint | Qt.WindowCloseButtonHint;
 
     minimumWidth: screenScaleFactor * 640;
     minimumHeight: screenScaleFactor * 480;
@@ -29,12 +27,9 @@ Window
 
     property alias loader: contentLoader
 
-    property alias buttonArea: buttonRow
-    property alias leftButtons: leftButtonRow.children
-    property alias rightButtons: rightButtonRow.children
+    property alias leftButtons: leftButtonRow.children;
+    property alias rightButtons: rightButtonRow.children;
     property alias backgroundColor: background.color
-
-    property real buttonSpacing: 0
 
     signal accepted();
     signal rejected();
@@ -61,8 +56,8 @@ Window
 
     Rectangle {
         id: background
-        color: UM.Theme.getColor("detail_background")
         anchors.fill: parent;
+        color: palette.window;
 
         focus: base.visible;
 
@@ -96,30 +91,24 @@ Window
             }
         }
 
-        RowLayout {
-            id: buttonRow
+        Item {
+            id: buttonRow;
 
             anchors {
-                bottom: parent.bottom
-                bottomMargin: base.margin
-                left: parent.left
-                leftMargin: base.margin
-                right: parent.right
-                rightMargin: base.margin
+                bottom: parent.bottom;
+                bottomMargin: base.margin;
+                left: parent.left;
+                leftMargin: base.margin;
+                right: parent.right;
+                rightMargin: base.margin;
             }
-            height: childrenRect.height
+            height: childrenRect.height;
 
-            RowLayout {
-                id: leftButtonRow
-                Layout.alignment: Qt.AlignLeft
-                spacing: base.buttonSpacing
-            }
+            Row { id: leftButtonRow; anchors.left: parent.left; }
 
-            RowLayout {
-                id: rightButtonRow
-                Layout.alignment: Qt.AlignRight
-                spacing: base.buttonSpacing
-            }
+            Row { id: rightButtonRow; anchors.right: parent.right; }
         }
     }
+
+    SystemPalette { id: palette; }
 }

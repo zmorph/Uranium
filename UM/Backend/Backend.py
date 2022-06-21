@@ -16,7 +16,7 @@ import UM.Application
 from UM.PluginObject import PluginObject
 from UM.Platform import Platform
 
-import pyArcus as Arcus
+import Arcus
 
 
 class BackendState(IntEnum):
@@ -60,7 +60,6 @@ class Backend(PluginObject):
     def setState(self, new_state):
         if new_state != self._backend_state:
             self._backend_state = new_state
-
             self.backendStateChange.emit(self._backend_state)
 
     def startEngine(self):
@@ -133,6 +132,7 @@ class Backend(PluginObject):
             su.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             su.wShowWindow = subprocess.SW_HIDE
             kwargs["startupinfo"] = su
+            kwargs["creationflags"] = 0x00004000  # BELOW_NORMAL_PRIORITY_CLASS
         try:
             # STDIN needs to be None because we provide no input, but communicate via a local socket instead. The NUL device sometimes doesn't exist on some computers.
             # STDOUT and STDERR need to be pipes because we'd like to log the output on those channels into the application log.

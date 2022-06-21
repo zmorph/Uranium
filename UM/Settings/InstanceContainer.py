@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2019 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
 
 import configparser
@@ -7,8 +7,8 @@ import copy
 import os
 from typing import Any, cast, Dict, List, Optional, Set, Tuple
 
-from PyQt6.QtCore import QObject, pyqtProperty, pyqtSignal
-from PyQt6.QtQml import QQmlEngine #To take ownership of this class ourselves.
+from PyQt5.QtCore import QObject, pyqtProperty, pyqtSignal
+from PyQt5.QtQml import QQmlEngine #To take ownership of this class ourselves.
 
 from UM.FastConfigParser import FastConfigParser
 from UM.Trust import Trust
@@ -61,7 +61,7 @@ class InstanceContainer(QObject, ContainerInterface, PluginObject):
         """
 
         super().__init__()
-        QQmlEngine.setObjectOwnership(self, QQmlEngine.ObjectOwnership.CppOwnership)
+        QQmlEngine.setObjectOwnership(self, QQmlEngine.CppOwnership)
 
         self._metadata = {
             "id": container_id,
@@ -327,12 +327,12 @@ class InstanceContainer(QObject, ContainerInterface, PluginObject):
         for key, value in self._cached_values.items():
             if key not in self._instances:
                 if not self.getDefinition():
-                    Logger.log("w", "Tried to set value of setting %s that has no SettingInstance in the InstanceContainer %s and the InstanceContainer has no SettingDefinition either", key, self.getName())
+                    Logger.log("w", "Tried to set value of setting %s that has no instance in container %s and the container has no definition", key, self.getName())
                     return
 
                 setting_definition = self.getDefinition().findDefinitions(key = key)
                 if not setting_definition:
-                    Logger.log("w", "Tried to set value of the setting %s, but it has no SettingInstance in this InstanceContainer %s or its SettingDefinition %s", key, self.getName(), self.getDefinition().getName())
+                    Logger.log("w", "Tried to set value of setting %s that has no instance in container %s or its definition %s", key, self.getName(), self.getDefinition().getName())
                     return
 
                 instance = SettingInstance(setting_definition[0], self)
@@ -369,12 +369,11 @@ class InstanceContainer(QObject, ContainerInterface, PluginObject):
             try:
                 definition = self.getDefinition()
             except DefinitionNotFoundError:
-                Logger.log("w", "Tried to set value of setting %s when the InstanceContainer has no SettingDefinition. "
-                                "This is not supported. Either manually add the SettingInstance or ensure that a SettingDefinition is set.", key)
+                Logger.log("w", "Tried to set value of setting when the container has no definition")
                 return
             setting_definition = definition.findDefinitions(key = key)
             if not setting_definition:
-                Logger.log("w", "Tried to set value of the setting %s, but it has no SettingInstance in this InstanceContainer %s or its SettingDefinition %s", key, self.getName(), self.getDefinition().getName())
+                Logger.log("w", "Tried to set value of setting %s that has no instance in container %s or its definition %s", key, self.getName(), self.getDefinition().getName())
                 return
 
             instance = SettingInstance(setting_definition[0], self)
@@ -455,7 +454,7 @@ class InstanceContainer(QObject, ContainerInterface, PluginObject):
         try:
             self.getDefinition()
         except DefinitionNotFoundError:
-            Logger.log("w", "Tried to serialize an InstanceContainer without SettingDefinition, this is not supported")
+            Logger.log("w", "Tried to serialize an instance container without definition, this is not supported")
             return ""
 
         parser["general"] = {}

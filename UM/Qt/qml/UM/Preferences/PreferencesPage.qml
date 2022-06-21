@@ -1,18 +1,18 @@
-// Copyright (c) 2022 Ultimaker B.V.
+// Copyright (c) 2015 Ultimaker B.V.
 // Uranium is released under the terms of the LGPLv3 or higher.
 
 import QtQuick 2.1
-import QtQuick.Controls 2.1
+import QtQuick.Controls 1.1
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Layouts 1.1
 import QtQuick.Window 2.1
 
-import UM 1.5 as UM
+import UM 1.0 as UM
 
-Item
-{
-    property alias title: titleLabel.text
-    default property alias contents: contentsItem.children
-    property bool resetEnabled: true
-    property alias buttons: buttonRow.children
+Item {
+    property alias title: titleLabel.text;
+    default property alias contents: contentsItem.children;
+    property bool resetEnabled: true;
 
     function reset()
     {
@@ -20,11 +20,10 @@ Item
     }
     function boolCheck(value) //Hack to ensure a good match between python and qml.
     {
-        if (value == "True")
+        if(value == "True")
         {
             return true
-        }
-        else if (value == "False" || value == undefined)
+        }else if(value == "False" || value == undefined)
         {
             return false
         }
@@ -34,53 +33,31 @@ Item
         }
     }
 
-    Item
-    {
-        id: titleBar
-        height: buttonRow.height
-        anchors
-        {
-            top: parent.top
-            left: parent.left
-            right: parent.right
-            margins: UM.Theme.getSize("narrow_margin").width
+    Label {
+        id: titleLabel;
+
+        anchors {
+            top: parent.top;
+            left: parent.left;
+            right: parent.right;
+            margins: 5 * screenScaleFactor;
         }
-        UM.Label
-        {
-            id: titleLabel
-            anchors.verticalCenter: parent.verticalCenter
-            font: UM.Theme.getFont("large_bold")
-        }
-        Row
-        {
-            id: buttonRow
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: UM.Theme.getSize("narrow_margin").width
-            anchors.right: parent.right
-            height: childrenRect.height
-        }
+
+        font: UM.Theme.getFont("huge_bold")
     }
 
-    Rectangle
-    {
-        color: UM.Theme.getColor("main_background")
-        anchors
-        {
-            top: titleBar.bottom
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-            margins: UM.Theme.getSize("narrow_margin").width
-            bottomMargin: 0
-        }
-        Item
-        {
-            id: contentsItem
+    Item {
+        id: contentsItem;
 
-            anchors.fill: parent
-            anchors.margins: UM.Theme.getSize("default_margin").width
-
-            clip: true
+        anchors {
+            top: titleLabel.bottom;
+            left: parent.left;
+            right: parent.right;
+            bottom: parent.bottom;
+            margins: 5 * screenScaleFactor;
+            bottomMargin: 0;
         }
+
+        clip: true;
     }
 }

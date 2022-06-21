@@ -84,16 +84,9 @@ class Resources:
         except UnsupportedStorageTypeError:
             pass
 
-        paths_secure = cls.__find(resource_type, True, *args)
-
-        if paths_secure:
-            return paths_secure[0]
-
-        if not cls.__is_enterprise_version:
-            paths = cls.__find(resource_type, False, *args)
-            if paths:
-                return paths[0]
-
+        paths = cls.__find(resource_type, *args)
+        if paths:
+            return paths[0]
 
         raise FileNotFoundError("Could not find resource {0} in {1}".format(args, resource_type))
 
@@ -210,21 +203,6 @@ class Resources:
 
         if os.path.isdir(path) and path not in cls.__paths:
             cls.__paths.append(path)
-
-    @classmethod
-    def addSecureSearchPath(cls, path: str) -> None:
-        """Add a path relative to which resources should be searched for.
-        This path should be secure, such as the install directory.
-
-        :param path: The path to add.
-        """
-        #  If we import at the top of this file we get circular import errors on startup due to CentralStorage
-        from UM.Application import Application
-        from UM.Trust import TrustBasics
-
-        if os.path.isdir(path) and path not in cls.__secure_paths and TrustBasics.isPathInLocation(Application.getInstallPrefix(), path):
-            cls.__paths.append(path)
-            cls.__secure_paths.append(path)
 
     @classmethod
     def removeSearchPath(cls, path: str) -> None:
@@ -375,7 +353,7 @@ class Resources:
                 Logger.logException("e", "Failed to backup [%s] to file [%s]", folder, zip_file_path)
 
     @classmethod
-    def __find(cls, resource_type: int, secure_paths_only: bool,  *args: str) -> List[str]:
+    def __find(cls, resource_type: int, *args: str) -> List[str]:
         """Returns a list of paths where args was found."""
 
         suffix = cls.__types.get(resource_type, None)
@@ -383,10 +361,7 @@ class Resources:
             return []
 
         files = []
-
-        paths = cls.__secure_paths if secure_paths_only else cls.__paths
-
-        for path in paths:
+        for path in cls.__paths:
             file_path = os.path.join(path, suffix, *args)
             if os.path.exists(file_path):
                 files.append(file_path)
@@ -663,21 +638,14 @@ class Resources:
     def addExpectedDirNameInData(cls, dir_name: str) -> None:
         cls.__expected_dir_names_in_data.append(dir_name)
 
-    @classmethod
-    def setIsEnterprise(cls, is_enterprise: bool) -> None:
-        cls.__is_enterprise_version = is_enterprise
+    __expected_dir_names_in_data = []  # type: List[str]
 
-    __expected_dir_names_in_data:List[str] = []
+    __config_storage_path = None    # type: str
+    __data_storage_path = None      # type: str
+    __cache_storage_path = None     # type: str
 
-    __config_storage_path: str = None
-    __data_storage_path: str = None
-    __cache_storage_path: str = None
-
-    __is_enterprise_version: bool = False
-
-    __paths: List[str] = []
-    __secure_paths: List[str] = []
-    __types: Dict[str, str] = {
+    __paths = []    # type: List[str]
+    __types = {
         Resources: "",
         Preferences: "",
         Cache: "",
@@ -692,8 +660,8 @@ class Resources:
         Plugins: "plugins",
         BundledPackages: "bundled_packages",
         Texts: "texts",
-    }
-    __types_storage: Dict[int, str] = {
+    } #type: Dict[int, str]
+    __types_storage = {
         Resources: "",
         Preferences: "",
         Cache: "",
@@ -702,4 +670,4 @@ class Resources:
         ContainerStacks: "stacks",
         Themes: "themes",
         Plugins: "plugins",
-    }
+    } #type: Dict[int, str]

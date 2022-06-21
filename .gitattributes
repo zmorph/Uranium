@@ -1,2 +1,0 @@
-# Always use line feeds, no carriage return!
-*.py text eol=lf

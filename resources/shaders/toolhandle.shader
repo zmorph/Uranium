@@ -18,19 +18,19 @@ vertex =
 fragment =
     uniform lowp vec4 u_disabledColor;
     uniform lowp vec4 u_activeColor;
-    uniform lowp float u_enableMultiplier;
+    uniform lowp float u_disabledMultiplier;
 
     varying lowp vec4 v_color;
 
     void main()
     {
-      if(u_activeColor == v_color)
+        if(u_activeColor == v_color)
         {
-            gl_FragColor = v_color * u_enableMultiplier;
+            gl_FragColor = v_color;
         }
         else
         {
-            gl_FragColor = v_color;
+            gl_FragColor = v_color * u_disabledMultiplier;
         }
     }
 
@@ -55,7 +55,7 @@ fragment41core =
     #version 410
     uniform lowp vec4 u_disabledColor;
     uniform lowp vec4 u_activeColor;
-    uniform lowp float u_enableMultiplier;
+    uniform lowp float u_disabledMultiplier;
 
     in lowp vec4 v_color;
     out vec4 frag_color;
@@ -64,19 +64,18 @@ fragment41core =
     {
         if(u_activeColor == v_color)
         {
-            frag_color = v_color * u_enableMultiplier;
+            frag_color = v_color;
         }
         else
         {
-            frag_color = v_color;
+            frag_color = v_color * u_disabledMultiplier;
         }
     }
 
 [defaults]
 u_disabledColor = [0.5, 0.5, 0.5, 1.0]
 u_activeColor = [0.5, 0.5, 0.5, 1.0]
-u_enableMultiplier = 1.2
-
+u_disabledMultiplier = 0.75
 
 [bindings]
 u_modelMatrix = model_matrix

@@ -1,9 +1,9 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2020 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
 
 from typing import Optional
 
-from PyQt6.QtCore import Qt
+from PyQt5.QtCore import Qt
 
 from UM.Event import Event, MouseEvent, KeyEvent
 from UM.Job import Job
@@ -51,7 +51,7 @@ class RotateTool(Tool):
         self._angle = None
         self._angle_update_time = None
 
-        self._shortcut_key = Qt.Key.Key_R
+        self._shortcut_key = Qt.Key_R
 
         self._progress_message = None
         self._iterations = 0
@@ -199,7 +199,9 @@ class RotateTool(Tool):
                     axis = math.floor((self._active_widget.value - self._active_widget.XPositive90.value) / 2)
 
                     angle = math.radians(90 if (self._active_widget.value - ToolHandle.AllAxis) % 2 else -90)
-                    axis += self._handle.XAxis
+                    axis +=  self._handle.XAxis
+
+                    rotation = Quaternion()
                     if axis == ToolHandle.XAxis:
                         rotation = Quaternion.fromAngleAxis(angle, Vector.Unit_X)
                     elif axis == ToolHandle.YAxis:

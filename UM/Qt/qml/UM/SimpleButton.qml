@@ -17,22 +17,21 @@ MouseArea
     property real iconMargin: 0
 
     property alias hovered: base.containsMouse
-    property alias backgroundRadius: background.radius
 
     Rectangle
     {
         id: background
         anchors.fill: parent
         color: base.containsMouse ? base.hoverBackgroundColor : base.backgroundColor
-        radius: 0
     }
 
-    ColorImage
+    RecolorImage
     {
         id: image
 
         anchors.fill: parent
         anchors.margins: base.iconMargin
+        sourceSize.height: width
 
         color: base.containsMouse ? base.hoverColor : base.color
 

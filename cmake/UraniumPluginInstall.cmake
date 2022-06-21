@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2019 Ultimaker B.V.
 # UraniumPluginInstall.cmake is released under the terms of the LGPLv3 or higher.
 
 #
@@ -8,6 +8,19 @@
 # Plugins can be configured to NOT BE INSTALLED via the variable "UM_NO_INSTALL_PLUGINS" as a list of string in the
 # form of "a;b;c" or "a,b,c". By default all plugins will be installed.
 #
+
+# FIXME: Remove the code for CMake <3.12 once we have switched over completely.
+# FindPython3 is a new module since CMake 3.12. It deprecates FindPythonInterp and FindPythonLibs. The FindPython3
+# module is copied from the CMake repository here so in CMake <3.12 we can still use it.
+if(${CMAKE_VERSION} VERSION_LESS 3.12)
+    # Use FindPythonInterp and FindPythonLibs for CMake <3.12
+    find_package(PythonInterp 3 REQUIRED)
+
+    set(Python3_EXECUTABLE ${PYTHON_EXECUTABLE})
+else()
+    # Use FindPython3 for CMake >=3.12
+    find_package(Python3 REQUIRED COMPONENTS Interpreter)
+endif()
 
 # Options or configuration variables
 set(UM_NO_INSTALL_PLUGINS "" CACHE STRING "A list of plugins that should not be installed, separated with ';' or ','.")
@@ -78,7 +91,7 @@ foreach(_plugin_json_path ${_plugin_json_list})
         list(APPEND _install_plugin_list ${_plugin_dir})
     elseif(_is_no_install_plugin)
         message(STATUS "[-] PLUGIN TO REMOVE : ${_rel_plugin_dir}")
-        execute_process(COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/mod_bundled_packages_json.py
+        execute_process(COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/cmake/mod_bundled_packages_json.py
                         -d ${CMAKE_CURRENT_SOURCE_DIR}/resources/bundled_packages
                         ${_plugin_dir_name}
                         RESULT_VARIABLE _mod_json_result)

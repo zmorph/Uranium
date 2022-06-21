@@ -29,7 +29,6 @@ class ReadMeshJob(ReadFileJob):
         super().run()
 
         if not self._result:
-            self._add_to_recent_files = False  # Failed to read any models due to error.
             self._result = []
 
         # Scale down to maximum bounds size if that is available

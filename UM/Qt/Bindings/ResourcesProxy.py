@@ -1,17 +1,14 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2015 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
 
-import enum
-
-from PyQt6.QtCore import QObject, pyqtEnum
+from PyQt5.QtCore import QObject, QUrl, Q_ENUMS
 from UM.FlameProfiler import pyqtSlot
 
 import UM.Resources
 from UM.Logger import Logger
 
-
 class ResourcesProxy(QObject):
-    class Type(enum.IntEnum):
+    class Type:
         Resources = UM.Resources.Resources.Resources
         Preferences = UM.Resources.Resources.Preferences
         Themes = UM.Resources.Resources.Themes
@@ -20,7 +17,7 @@ class ResourcesProxy(QObject):
         i18n = UM.Resources.Resources.i18n
         Shaders = UM.Resources.Resources.Shaders
         UserType = UM.Resources.Resources.UserType
-    pyqtEnum(Type)
+    Q_ENUMS(Type)
 
     def __init__(self, parent = None):
         super().__init__(parent)

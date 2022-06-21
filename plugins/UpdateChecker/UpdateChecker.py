@@ -1,13 +1,13 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2021 Ultimaker B.V.
 # Copyright (c) 2013 David Braam
 # Uranium is released under the terms of the LGPLv3 or higher.
 import platform
 import json
 from typing import TYPE_CHECKING, Dict, Optional, Tuple, Type
 
-from PyQt6.QtCore import QUrl
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtNetwork import QNetworkRequest
+from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QDesktopServices
+from PyQt5.QtNetwork import QNetworkRequest
 
 from UM.Application import Application
 from UM.Extension import Extension
@@ -20,7 +20,7 @@ from .NewBetaVersionMessage import NewBetaVersionMessage
 from .NewVersionMessage import NewVersionMessage
 
 if TYPE_CHECKING:
-    from PyQt6.QtNetwork import QNetworkReply
+    from PyQt5.QtNetwork import QNetworkReply
 
 
 i18n_catalog = i18nCatalog("uranium")
@@ -83,7 +83,7 @@ class UpdateChecker(Extension):
                         int(data[application_name][os]["revision"])]), data[application_name][os]["url"]
 
     def _onRequestCompleted(self, reply: "QNetworkReply", silent: bool, display_same_version: bool) -> None:
-        if reply.attribute(QNetworkRequest.Attribute.HttpStatusCodeAttribute) != 200:
+        if reply.attribute(QNetworkRequest.HttpStatusCodeAttribute) != 200:
             Logger.log("w", "Something went wrong when checking for updates. We didn't get the expected response")
             return
         try:
@@ -123,7 +123,6 @@ class UpdateChecker(Extension):
                                          "info/latest_update_version_shown")
             else:
                 # Beta version is the highest, check for that
-                local_version = local_version.getWithoutPostfix()  # Since we can't specify postfix in the latest.json.
                 if download_url is not None:
                     self._download_url = beta_download_url
                 self._handleLatestUpdate(local_version, newest_beta_version, silent, display_same_version,

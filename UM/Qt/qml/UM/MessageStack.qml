@@ -2,10 +2,11 @@
 // Uranium is released under the terms of the LGPLv3 or higher.
 
 import QtQuick 2.3
-import QtQuick.Controls 2.1
+import QtQuick.Controls 1.1
+import QtQuick.Controls.Styles 1.3
 import QtQuick.Layouts 1.1
 
-import UM 1.5 as UM
+import UM 1.4 as UM
 
 ListView
 {
@@ -38,19 +39,22 @@ ListView
     {
         Button
         {
-            id: control
             text: model.name
-            background: Item {}
-            contentItem: Label
+            style: ButtonStyle
             {
-                text: control.text
-                font:
+                background: Item {}
+
+                label: Label
                 {
-                    var defaultFont = UM.Theme.getFont("default")
-                    defaultFont.underline = true
-                    return defaultFont
+                    text: control.text
+                    font:
+                    {
+                        var defaultFont = UM.Theme.getFont("default")
+                        defaultFont.underline = true
+                        return defaultFont
+                    }
+                    color: UM.Theme.getColor("text_link")
                 }
-                color: UM.Theme.getColor("text_link")
             }
         }
     }
@@ -114,28 +118,44 @@ ListView
                 }
             }
 
-            UM.Label
+
+            Label
             {
                 id: messageTitle
                 Layout.fillWidth: true
 
                 text: model.title == undefined ? "" : model.title
+                color: UM.Theme.getColor("text")
                 font: UM.Theme.getFont("default_bold")
+                wrapMode: Text.WordWrap
                 elide: Text.ElideRight
                 maximumLineCount: 2
+                renderType: Text.NativeRendering
             }
-            UM.SimpleButton
+
+            Button
             {
                 id: closeButton
                 implicitWidth: UM.Theme.getSize("message_close").width
                 implicitHeight: UM.Theme.getSize("message_close").height
                 Layout.alignment: Qt.AlignTop
+
+                style: ButtonStyle
+                {
+                    background: UM.RecolorImage
+                    {
+                        width: UM.Theme.getSize("message_close").width
+                        sourceSize.width: width
+                        color: control.hovered ? UM.Theme.getColor("message_close_hover") : UM.Theme.getColor("message_close")
+                        source: UM.Theme.getIcon("Cancel")
+                    }
+
+                    label: Item {}
+                }
+
                 onClicked: base.model.hideMessage(model.id)
                 visible: model.dismissable
                 enabled: model.dismissable
-                color: UM.Theme.getColor("message_close")
-                hoverColor: UM.Theme.getColor("message_close_hover")
-                iconSource: UM.Theme.getIcon("Cancel")
             }
         }
         Column
@@ -175,7 +195,7 @@ ListView
                 mipmap: true
             }
 
-            UM.Label
+            Label
             {
                 id: imageCaption
                 anchors
@@ -186,15 +206,17 @@ ListView
                 text: model.image_caption
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
+                color: UM.Theme.getColor("text")
                 font: UM.Theme.getFont("large_bold")
                 height: text != "" ? contentHeight : 0
                 linkColor: UM.Theme.getColor("text_link")
             }
         }
 
-        UM.Label
+        Label
         {
             id: messageLabel
+
             anchors
             {
                 left: parent.left
@@ -216,9 +238,14 @@ ListView
 
             text: model.progress > 0 ? messageLabel.getProgressText() : model.text == undefined ? "" : model.text
             onLinkActivated: Qt.openUrlExternally(link)
+            color: UM.Theme.getColor("text")
+            font: UM.Theme.getFont("default")
+            wrapMode: Text.Wrap
+            renderType: Text.NativeRendering
+            linkColor: UM.Theme.getColor("text_link")
         }
 
-        UM.CheckBox
+        CheckBox
         {
             id: optionToggle
             anchors
@@ -235,6 +262,16 @@ ListView
             height: visible ? undefined: 0
             checked: model.option_state
             onCheckedChanged: base.model.optionToggled(message.model_id, checked)
+            style: CheckBoxStyle
+            {
+                label: Label
+                {
+                    text: control.text
+                    font: UM.Theme.getFont("default")
+                    color: UM.Theme.getColor("text")
+                    elide: Text.ElideRight
+                }
+            }
         }
 
         UM.ProgressBar
@@ -266,22 +303,20 @@ ListView
             }
         }
 
+        // Right aligned Action Buttons
         RowLayout
         {
             id: actionButtons
 
             anchors
             {
-                left: parent.left
-                leftMargin: UM.Theme.getSize("narrow_margin").width
                 right: parent.right
-                rightMargin: UM.Theme.getSize("narrow_margin").width
+                rightMargin: UM.Theme.getSize("default_margin").width
+
                 top: totalProgressBar.bottom
                 topMargin: UM.Theme.getSize("narrow_margin").width
             }
-            spacing: UM.Theme.getSize("narrow_margin").width
 
-            //Left-aligned buttons.
             Repeater
             {
                 model:
@@ -296,82 +331,9 @@ ListView
                     for(var index = 0; index < sizeOfActions; index++)
                     {
                         var actionButton = message.actions.getItem(index)
+
                         var alignPosition = actionButton["button_align"]
-                        // ActionButtonStyle.BUTTON_ALIGN_LEFT == 2
-                        if (alignPosition == 2)
-                        {
-                            filteredModel.push(actionButton)
-                        }
-                    }
-                    return filteredModel
-                }
 
-                // Put the delegate in a loader so we can connect to it's signals.
-                // We also need to use a different component based on the style of the action.
-                // But since loaders can't get a size assigned by the layout, wrap that in an item to get the size of.
-                delegate: Item
-                {
-                    id: actionButtonSize
-                    Layout.maximumWidth: childrenRect.width
-                    Layout.preferredWidth: 9999 //Something very high to make it scale the spacer first.
-                    Layout.preferredHeight: actionButton.item.height
-                    Layout.fillWidth: true
-                    Loader
-                    {
-                        id: actionButton
-                        sourceComponent:
-                        {
-                            if (modelData.button_style == 0)
-                            {
-                                return base.primaryButton
-                            }
-                            else if (modelData.button_style == 1)
-                            {
-                                return base.link
-                            }
-                            else if (modelData.button_style == 2)
-                            {
-                                return base.secondaryButton
-                            }
-                            return base.primaryButton // We got to use something, so use primary.
-                        }
-                        onLoaded:
-                        {
-                            item.maximumWidth = Qt.binding(function() { return parent.width; });
-                        }
-                        property var model: modelData
-                        Connections
-                        {
-                            target: actionButton.item
-                            function onClicked() { base.model.actionTriggered(message.model_id, modelData.action_id) }
-                        }
-                    }
-                }
-            }
-
-            //Spacer in the middle the fills the remaining space. Causes right-aligned buttons to be aligned right!
-            Item
-            {
-                Layout.fillWidth: true
-                Layout.preferredWidth: 0
-            }
-
-            //Right-aligned buttons.
-            Repeater
-            {
-                model:
-                {
-                    var filteredModel = new Array()
-                    var sizeOfActions = message.actions == null ? 0 : message.actions.count
-                    if(sizeOfActions == 0)
-                    {
-                        return 0;
-                    }
-
-                    for(var index = 0; index < sizeOfActions; index++)
-                    {
-                        var actionButton = message.actions.getItem(index)
-                        var alignPosition = actionButton["button_align"]
                         // ActionButtonStyle.BUTTON_ALIGN_RIGHT == 3
                         if (alignPosition == 3)
                         {
@@ -383,43 +345,97 @@ ListView
 
                 // Put the delegate in a loader so we can connect to it's signals.
                 // We also need to use a different component based on the style of the action.
-                // But since loaders can't get a size assigned by the layout, wrap that in an item to get the size of.
-                delegate: Item
+                delegate: Loader
                 {
-                    id: actionButtonSize
-                    Layout.maximumWidth: childrenRect.width
-                    Layout.preferredWidth: 9999 //Something very high to make it scale the spacer first.
-                    Layout.preferredHeight: actionButton.item.height
-                    Layout.fillWidth: true
-                    Loader
+                    id: actionButton
+                    sourceComponent:
                     {
-                        id: actionButton
-                        sourceComponent:
+                        if (modelData.button_style == 0)
                         {
-                            if (modelData.button_style == 0)
-                            {
-                                return base.primaryButton
-                            }
-                            else if (modelData.button_style == 1)
-                            {
-                                return base.link
-                            }
-                            else if (modelData.button_style == 2)
-                            {
-                                return base.secondaryButton
-                            }
-                            return base.primaryButton // We got to use something, so use primary.
-                        }
-                        onLoaded:
+                            return base.primaryButton
+                        } else if (modelData.button_style == 1)
                         {
-                            item.maximumWidth = Qt.binding(function() { return parent.width; });
-                        }
-                        property var model: modelData
-                        Connections
+                            return base.link
+                        } else if (modelData.button_style == 2)
                         {
-                            target: actionButton.item
-                            function onClicked() { base.model.actionTriggered(message.model_id, modelData.action_id) }
+                            return base.secondaryButton
                         }
+                        return base.primaryButton // We got to use something, so use primary.
+                    }
+                    property var model: modelData
+                    Connections
+                    {
+                        target: actionButton.item
+                        function onClicked() { base.model.actionTriggered(message.model_id, modelData.action_id) }
+                    }
+                }
+            }
+        }
+
+        // Left aligned Action Buttons
+        RowLayout
+        {
+            id: leftActionButtons
+
+            anchors
+            {
+                left: messageLabel.left
+                leftMargin: UM.Theme.getSize("narrow_margin").width
+
+                top: totalProgressBar.bottom
+                topMargin: UM.Theme.getSize("narrow_margin").width
+            }
+
+            Repeater
+            {
+                model:
+                {
+                    var filteredModel = new Array()
+                    var sizeOfActions = message.actions == null ? 0 : message.actions.count
+                    if(sizeOfActions == 0)
+                    {
+                        return 0;
+                    }
+
+                    for(var index = 0; index < sizeOfActions; index++)
+                    {
+                        var actionButton = message.actions.getItem(index)
+
+                        var alignPosition = actionButton["button_align"]
+
+                        // ActionButtonStyle.BUTTON_ALIGN_LEFT == 2
+                        if (alignPosition == 2)
+                        {
+                            filteredModel.push(actionButton)
+                        }
+                    }
+                    return filteredModel
+                }
+
+                // Put the delegate in a loader so we can connect to it's signals.
+                // We also need to use a different component based on the style of the action.
+                delegate: Loader
+                {
+                    id: actionButton
+                    sourceComponent:
+                    {
+                        if (modelData.button_style == 0)
+                        {
+                            return base.primaryButton
+                        } else if (modelData.button_style == 1)
+                        {
+                            return base.link
+                        } else if (modelData.button_style == 2)
+                        {
+                            return base.secondaryButton
+                        }
+                        return base.primaryButton // We got to use something, so use primary.
+                    }
+                    property var model: modelData
+                    Connections
+                    {
+                        target: actionButton.item
+                        function onClicked() { base.model.actionTriggered(message.model_id, modelData.action_id) }
                     }
                 }
             }

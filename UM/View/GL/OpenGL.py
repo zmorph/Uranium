@@ -1,14 +1,11 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2021 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
 
 import sys
 import ctypes   # type: ignore
 
-from PyQt6.QtOpenGL import QOpenGLVersionFunctionsFactory
-
-from PyQt6.QtGui import QOpenGLContext
-from PyQt6.QtOpenGL import QOpenGLVersionProfile, QOpenGLFramebufferObject, QOpenGLBuffer
-from PyQt6.QtWidgets import QMessageBox
+from PyQt5.QtGui import QOpenGLVersionProfile, QOpenGLContext, QOpenGLFramebufferObject, QOpenGLBuffer
+from PyQt5.QtWidgets import QMessageBox
 from typing import Any, TYPE_CHECKING, cast, Optional
 
 from UM.Logger import Logger
@@ -48,9 +45,9 @@ class OpenGL:
     def __init__(self) -> None:
         if OpenGL.__instance is not None:
             raise RuntimeError("Try to create singleton '%s' more than once" % self.__class__.__name__)
+        OpenGL.__instance = self
 
         super().__init__()
-        OpenGL.__instance = self
 
         profile = QOpenGLVersionProfile()
         profile.setVersion(OpenGLContext.major_version, OpenGLContext.minor_version)
@@ -59,12 +56,12 @@ class OpenGL:
         context = QOpenGLContext.currentContext()
         if not context:
             Logger.log("e", "Startup failed due to OpenGL context creation failing")
-            QOpenGLContext.currentContext()
+            QMessageBox.critical(None, i18n_catalog.i18nc("@message", "Failed to Initialize OpenGL", "Could not initialize an OpenGL context. This program requires OpenGL 2.0 or higher. Please check your video card drivers."))
             sys.exit(1)
-        self._gl = QOpenGLVersionFunctionsFactory.get(profile, context)
+        self._gl = context.versionFunctions(profile) # type: Any #It's actually a protected class in PyQt that depends on the implementation of your graphics card.
         if not self._gl:
             Logger.log("e", "Startup failed due to OpenGL initialization failing")
-            QMessageBox.critical(QMessageBox.Icon.Critical, "Failed to Initialize OpenGL", i18n_catalog.i18nc("@message", "Failed to Initialize OpenGL", "Could not initialize OpenGL. This program requires OpenGL 2.0 or higher. Please check your video card drivers."))
+            QMessageBox.critical(None, i18n_catalog.i18nc("@message", "Failed to Initialize OpenGL", "Could not initialize OpenGL. This program requires OpenGL 2.0 or higher. Please check your video card drivers."))
             sys.exit(1)
 
         # It would be nice to be able to not necessarily need OpenGL FrameBuffer Object support, but
@@ -94,7 +91,7 @@ class OpenGL:
 
         self._gpu_type = "Unknown"  # type: str
         # WORKAROUND: Cura/#1117 Cura-packaging/12
-        # Some Intel GPU chipsets return a string, which is not undecodable via PyQt6.
+        # Some Intel GPU chipsets return a string, which is not undecodable via PyQt5.
         # This workaround makes the code fall back to a "Unknown" renderer in these cases.
         try:
             self._gpu_type = self._gl.glGetString(self._gl.GL_RENDERER)
@@ -227,7 +224,7 @@ class OpenGL:
         if not kwargs.get("force_recreate", False) and hasattr(mesh, OpenGL.VertexBufferProperty):
             return getattr(mesh, OpenGL.VertexBufferProperty)
 
-        buffer = QOpenGLBuffer(QOpenGLBuffer.Type.VertexBuffer)
+        buffer = QOpenGLBuffer(QOpenGLBuffer.VertexBuffer)
         buffer.create()
         buffer.bind()
 
@@ -309,7 +306,7 @@ class OpenGL:
         if not kwargs.get("force_recreate", False) and hasattr(mesh, OpenGL.IndexBufferProperty):
             return getattr(mesh, OpenGL.IndexBufferProperty)
 
-        buffer = QOpenGLBuffer(QOpenGLBuffer.Type.IndexBuffer)
+        buffer = QOpenGLBuffer(QOpenGLBuffer.IndexBuffer)
         buffer.create()
         buffer.bind()
 

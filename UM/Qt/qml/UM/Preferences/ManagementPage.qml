@@ -1,193 +1,179 @@
-// Copyright (c) 2022 Ultimaker B.V.
+// Copyright (c) 2018 Ultimaker B.V.
 // Uranium is released under the terms of the LGPLv3 or higher.
 
 import QtQuick 2.1
-import QtQuick.Controls 2.15
+import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
-import QtQuick.Dialogs
 
-import UM 1.5 as UM
+import UM 1.1 as UM
 
 PreferencesPage
 {
-    id: base
+    id: base;
 
-    property alias model: objectList.model
-    property alias section: objectList.section
-    property alias delegate: objectList.delegate
-    property alias sectionRole: objectList.section.property
+    property alias model: objectList.model;
+    property alias section: objectList.section;
+    property alias delegate: objectList.delegate;
+    property string nameRole: "name";
+    property string sectionRole: "group"
+    property bool detailsVisible: true;
 
-    property bool detailsVisible: true
-
-    property variant objectList: objectList
+    property variant objectList: objectList;
     property variant currentItem: null
-    property alias detailsPlaneCaption: detailsPlaneCaptionLabel.text
-    property alias scrollviewCaption: scrollViewCaptionLabel.text
+    property string scrollviewCaption: "";
 
-    default property alias content: detailsPane.children
-    property alias listContent: objectListBackground.children
+    default property alias details: detailsPane.children;
 
-    signal itemActivated()
-    signal hamburgeButtonClicked(Item hamburger_button)
-    property alias hamburgerButtonVisible: hamburgerButton.visible
+    signal itemActivated();
 
-    property var isActiveModelFunction: function(model, id) { return model.id == id }
+    property alias buttons: buttonRow.children;
 
-    resetEnabled: false
+    resetEnabled: false;
 
     property string activeId: ""
     property int activeIndex: -1
 
-    UM.Label
+    Row
     {
-        id: scrollViewCaptionLabel
+        id: buttonRow;
+
         anchors
         {
-            top: parent.top
             left: parent.left
+            right: parent.right
+            top: parent.top
         }
-        visible: text != ""
-        width: objectListBackground.width
-        elide: Text.ElideRight
-        textFormat: Text.StyledText
+
+        height: childrenRect.height;
     }
 
-    Rectangle
+    Item
     {
-        id: objectListBackground
-        color: UM.Theme.getColor("main_background")
-        border.width: UM.Theme.getSize("default_lining").width
-        border.color: UM.Theme.getColor("thick_lining")
         anchors
         {
-            top: scrollViewCaptionLabel.visible ? scrollViewCaptionLabel.bottom : parent.top
-            topMargin: scrollViewCaptionLabel.visible ? UM.Theme.getSize("default_margin").height : 0
-            bottom: parent.bottom
-            left: parent.left
+            top: buttonRow.bottom;
+            topMargin: UM.Theme.getSize("default_margin").height;
+            left: parent.left;
+            right: parent.right;
+            bottom: parent.bottom;
         }
-        width: base.detailsVisible ? Math.round(parent.width * 0.3) : parent.width
-        ListView
+
+        Label
         {
-            id: objectList
-
-            clip: true
-            ScrollBar.vertical: UM.ScrollBar {}
-            anchors.fill: parent
-            anchors.margins: UM.Theme.getSize("default_margin").height
-            anchors.topMargin: UM.Theme.getSize("narrow_margin").height
-            currentIndex: activeIndex
-            boundsBehavior: Flickable.StopAtBounds
-            onCurrentIndexChanged:
+            id: captionLabel
+            anchors
             {
-                // Explicitly trigger onCurrentItemChanged
-                base.currentItem = null;
-                base.currentItem = (currentIndex != null) ? model.getItem(currentIndex) : null;
+                top: parent.top;
+                left: parent.left;
+            }
+            visible: scrollviewCaption != ""
+            text: scrollviewCaption
+            width: objectListContainer.width
+            elide: Text.ElideRight
+        }
+
+        ScrollView
+        {
+            id: objectListContainer
+            anchors
+            {
+                top: captionLabel.visible ? captionLabel.bottom : parent.top;
+                topMargin: captionLabel.visible ? UM.Theme.getSize("default_margin").height : 0;
+                bottom: parent.bottom;
+                left: parent.left;
             }
 
+            width: base.detailsVisible ? Math.round(parent.width * 0.4) | 0 : parent.width;
+            frameVisible: true;
 
-            section.criteria: ViewSection.FullString
-            section.delegate: Rectangle
+            Rectangle
             {
-                width: objectList.width - objectList.ScrollBar.vertical.width
-                height: sectionLabel.height + UM.Theme.getSize("narrow_margin").height
-                color: UM.Theme.getColor("background_1")
-
-                UM.Label
-                {
-                    id: sectionLabel
-                    anchors.left: parent.left
-                    anchors.leftMargin: UM.Theme.getSize("default_lining").width
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: section
-                    font: UM.Theme.getFont("default_bold")
-                    color: UM.Theme.getColor("text_default")
-                }
+                parent: viewport
+                anchors.fill: parent
+                color: palette.light
             }
 
-            delegate: Rectangle
+            ListView
             {
-                width: objectList.width - objectList.ScrollBar.vertical.width
-                height: childrenRect.height
-                color: ListView.isCurrentItem ? UM.Theme.getColor("text_selection") : UM.Theme.getColor("main_background")
-                UM.Label
+                id: objectList;
+                currentIndex: activeIndex
+                onCurrentIndexChanged:
                 {
-                    anchors.left: parent.left
-                    anchors.leftMargin: UM.Theme.getSize("default_margin").width
-                    anchors.right: parent.right
-                    text: model.name
-                    elide: Text.ElideRight
-                    font: isActiveModelFunction(model, activeId) ? UM.Theme.getFont("default_italic") : UM.Theme.getFont("default")
-                    wrapMode: Text.NoWrap
+                    // Explicitly trigger onCurrentItemChanged
+                    base.currentItem = null;
+                    base.currentItem = (currentIndex != null) ? model.getItem(currentIndex) : null;
                 }
 
-                MouseArea
+                section.property: base.sectionRole
+                section.criteria: ViewSection.FullString
+                section.delegate: Rectangle
                 {
-                    anchors.fill: parent
-                    onClicked:
+                    width: objectListContainer.viewport.width;
+                    height: childrenRect.height;
+                    color: palette.light
+
+                    Label
                     {
-                        if(!parent.ListView.isCurrentItem)
+                        anchors.left: parent.left;
+                        anchors.leftMargin: UM.Theme.getSize("default_lining").width;
+                        text: section
+                        font.bold: true
+                        color: palette.text;
+                    }
+                }
+
+                delegate: Rectangle
+                {
+                    width: objectListContainer.viewport.width
+                    height: Math.round(childrenRect.height)
+                    color: ListView.isCurrentItem ? "#202d35" : index % 2 ? palette.base : palette.alternateBase
+
+                    Label
+                    {
+                        anchors.left: parent.left;
+                        anchors.leftMargin: UM.Theme.getSize("default_margin").width;
+                        anchors.right: parent.right;
+                        text: model.name
+                        elide: Text.ElideRight
+                        font.italic: model.id == activeId
+                        color: parent.ListView.isCurrentItem ? "white" : "black";
+                    }
+
+                    MouseArea
+                    {
+                        anchors.fill: parent;
+                        onClicked:
                         {
-                            parent.ListView.view.currentIndex = index;
-                            base.itemActivated();
+                            if(!parent.ListView.isCurrentItem)
+                            {
+                                parent.ListView.view.currentIndex = index;
+                                base.itemActivated();
+                            }
                         }
                     }
                 }
             }
         }
-    }
 
-    Item
-    {
-        id: detailsPlaneCaption
-        height: childrenRect.height
-
-        anchors
+        Item
         {
-            left: objectListBackground.right
-            leftMargin: UM.Theme.getSize("default_margin").width
-            top: parent.top
-            right: parent.right
-        }
+            id: detailsPane;
 
-        UM.Label
-        {
-            id: detailsPlaneCaptionLabel
-            anchors.verticalCenter: hamburgerButton.verticalCenter
-            font: UM.Theme.getFont("large_bold")
-        }
-
-        UM.ToolbarButton
-        {
-            id: hamburgerButton
-            anchors.right: parent.right
-            toolItem: UM.ColorImage
+            anchors
             {
-                source: UM.Theme.getIcon("Hamburger")
-                color: UM.Theme.getColor("icon")
+                left: objectListContainer.right;
+                leftMargin: UM.Theme.getSize("default_margin").width;
+                top: parent.top;
+                bottom: parent.bottom;
+                right: parent.right;
             }
-            onClicked: base.hamburgeButtonClicked(hamburgerButton)
-        }
-    }
 
-    Item
-    {
-        id: detailsPane
-
-        anchors
-        {
-            left: objectListBackground.right
-            leftMargin: UM.Theme.getSize("default_margin").width
-            top: detailsPlaneCaption.bottom
-            topMargin: UM.Theme.getSize("narrow_margin").width
-            bottom: parent.bottom
-            right: parent.right
+            visible: base.detailsVisible;
         }
 
-        visible: base.detailsVisible
-    }
+        UM.I18nCatalog { id: catalog; name: "uranium"; }
+        SystemPalette { id: palette }
 
-    Item
-    {
         Connections
         {
             target: objectList.model

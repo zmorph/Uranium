@@ -1,50 +1,46 @@
-// Copyright (c) 2021 Ultimaker B.V.
+// Copyright (c) 2019 Ultimaker B.V.
 // Uranium is released under the terms of the LGPLv3 or higher.
 
 import QtQuick 2.2
-import UM 1.5 as UM
+import QtQuick.Controls 1.2
+
+import UM 1.1 as UM
 
 Item
 {
     width: childrenRect.width
     height: childrenRect.height
     UM.I18nCatalog { id: catalog; name: "uranium"}
-
-    UM.ToolbarButton
+    Button
     {
         id: resetRotationButton
 
         anchors.left: parent.left;
 
+        //: Reset Rotation tool button
         text: catalog.i18nc("@action:button", "Reset")
-        toolItem: UM.ColorImage
-        {
-            source: UM.Theme.getIcon("ArrowReset")
-            color: UM.Theme.getColor("icon")
-        }
+        iconSource: UM.Theme.getIcon("ArrowReset");
         property bool needBorder: true
 
+        style: UM.Theme.styles.tool_button;
         z: 2
 
-        onClicked: UM.ActiveTool.triggerAction("resetRotation")
+        onClicked: UM.ActiveTool.triggerAction("resetRotation");
     }
 
-    UM.ToolbarButton
+    Button
     {
         id: layFlatButton
 
-        anchors.left: resetRotationButton.right
-        anchors.leftMargin: UM.Theme.getSize("default_margin").width
+        anchors.left: resetRotationButton.right;
+        anchors.leftMargin: UM.Theme.getSize("default_margin").width;
 
         //: Lay Flat tool button
         text: catalog.i18nc("@action:button", "Lay flat")
+        iconSource: UM.Theme.getIcon("LayFlat");
+        property bool needBorder: true
 
-        toolItem: UM.ColorImage
-        {
-            source: UM.Theme.getIcon("LayFlat")
-            color: UM.Theme.getColor("icon")
-        }
-
+        style: UM.Theme.styles.tool_button;
         z: 1
 
         onClicked: UM.ActiveTool.triggerAction("layFlat");
@@ -53,41 +49,41 @@ Item
         // visible: ! UM.ActiveTool.properties.getValue("SelectFaceSupported");
     }
 
-    UM.ToolbarButton{
+    Button
+    {
         id: alignFaceButton
 
-        anchors.left: layFlatButton.visible ? layFlatButton.right : resetRotationButton.right
-        anchors.leftMargin: UM.Theme.getSize("default_margin").width
-        width: visible ? UM.Theme.getIcon("LayFlatOnFace").width : 0
+        anchors.left: layFlatButton.visible ? layFlatButton.right : resetRotationButton.right;
+        anchors.leftMargin: UM.Theme.getSize("default_margin").width;
+        width: visible ? UM.Theme.getIcon("LayFlatOnFace").width : 0;
 
         text: catalog.i18nc("@action:button", "Select face to align to the build plate")
+        iconSource: UM.Theme.getIcon("LayFlatOnFace")
+        property bool needBorder: true
 
-        toolItem: UM.ColorImage
-        {
-            source: UM.Theme.getIcon("LayFlatOnFace")
-            color: UM.Theme.getColor("icon")
-        }
-
-        checkable: true
+        style: UM.Theme.styles.tool_button;
 
         enabled: UM.Selection.selectionCount == 1
         checked: UM.ActiveTool.properties.getValue("SelectFaceToLayFlatMode")
-        onClicked: UM.ActiveTool.setProperty("SelectFaceToLayFlatMode", checked)
+        onClicked: UM.ActiveTool.setProperty("SelectFaceToLayFlatMode", !checked)
 
         visible: UM.ActiveTool.properties.getValue("SelectFaceSupported") == true //Might be undefined if we're switching away from the RotateTool!
     }
 
-    UM.CheckBox
+    CheckBox
     {
         id: snapRotationCheckbox
-        anchors.top: resetRotationButton.bottom
-        anchors.topMargin: UM.Theme.getSize("default_margin").width
+        anchors.left: parent.left;
+        anchors.top: resetRotationButton.bottom;
+        anchors.topMargin: UM.Theme.getSize("default_margin").width;
 
         //: Snap Rotation checkbox
-        text: catalog.i18nc("@action:checkbox","Snap Rotation")
+        text: catalog.i18nc("@action:checkbox","Snap Rotation");
 
-        checked: UM.ActiveTool.properties.getValue("RotationSnap")
-        onClicked: UM.ActiveTool.setProperty("RotationSnap", checked)
+        style: UM.Theme.styles.checkbox;
+
+        checked: UM.ActiveTool.properties.getValue("RotationSnap");
+        onClicked: UM.ActiveTool.setProperty("RotationSnap", checked);
     }
 
     Binding

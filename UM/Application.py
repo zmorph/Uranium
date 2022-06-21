@@ -55,9 +55,9 @@ class Application:
 
         if Application.__instance is not None:
             raise RuntimeError("Try to create singleton '%s' more than once" % self.__class__.__name__)
+        Application.__instance = self
 
         super().__init__()  # Call super to make multiple inheritance work.
-        Application.__instance = self
 
         self._api_version = Version(api_version)  # type: Version
 
@@ -175,15 +175,15 @@ class Application:
         Resources.ApplicationVersion = self._version
 
         app_root = os.path.abspath(os.path.join(os.path.dirname(sys.executable)))
-        Resources.addSecureSearchPath(os.path.join(app_root, "share", "uranium", "resources"))
+        Resources.addSearchPath(os.path.join(app_root, "share", "uranium", "resources"))
 
-        Resources.addSecureSearchPath(os.path.join(os.path.dirname(sys.executable), "resources"))
-        Resources.addSecureSearchPath(os.path.join(self._app_install_dir, "share", "uranium", "resources"))
-        Resources.addSecureSearchPath(os.path.join(self._app_install_dir, "Resources", "uranium", "resources"))
-        Resources.addSecureSearchPath(os.path.join(self._app_install_dir, "Resources", self._app_name, "resources"))
+        Resources.addSearchPath(os.path.join(os.path.dirname(sys.executable), "resources"))
+        Resources.addSearchPath(os.path.join(self._app_install_dir, "share", "uranium", "resources"))
+        Resources.addSearchPath(os.path.join(self._app_install_dir, "Resources", "uranium", "resources"))
+        Resources.addSearchPath(os.path.join(self._app_install_dir, "Resources", self._app_name, "resources"))
 
         if not hasattr(sys, "frozen"):
-            Resources.addSecureSearchPath(os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "resources"))
+            Resources.addSearchPath(os.path.join(os.path.abspath(os.path.dirname(__file__)), "..", "resources"))
 
         i18nCatalog.setApplication(self)
 

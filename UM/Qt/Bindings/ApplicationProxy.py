@@ -1,9 +1,10 @@
-# Copyright (c) 2022 Ultimaker B.V.
+# Copyright (c) 2015 Ultimaker B.V.
 # Uranium is released under the terms of the LGPLv3 or higher.
 
-from PyQt6.QtCore import QObject, pyqtSlot, pyqtProperty, pyqtSignal
+from PyQt5.QtCore import QObject, pyqtSlot, pyqtProperty, pyqtSignal
 
 from UM.Application import Application
+from UM.Logger import Logger
 
 
 class ApplicationProxy(QObject):
@@ -14,3 +15,4 @@ class ApplicationProxy(QObject):
     @pyqtProperty(str, constant = True)
     def version(self):
         return self._application.getVersion()
+

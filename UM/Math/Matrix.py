@@ -129,9 +129,6 @@ class Matrix:
 
         return self._data.astype(numpy.float32)
 
-    def getFlatData(self):
-        return self._data.flatten()
-
     def setToIdentity(self) -> None:
         """Create a 4x4 identity matrix. This overwrites any existing data."""
 
@@ -550,7 +547,7 @@ class Matrix:
             if out is not data:
                 out[:] = numpy.array(data, copy = False)
             data = out
-        length = numpy.atleast_1d(numpy.sum(data * data, axis))  # type: ignore
+        length = numpy.atleast_1d(numpy.sum(data*data, axis))
         numpy.sqrt(length, length)
         if axis is not None:
             length = numpy.expand_dims(length, axis)
